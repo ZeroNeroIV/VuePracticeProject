@@ -2,7 +2,7 @@
   <v-app>
     <!-- App Bar -->
     <v-app-bar app class="bg-transparent elevation-0">
-      <v-app-bar-title>Vue Practice App</v-app-bar-title>
+      <v-app-bar-title>{{ title }}</v-app-bar-title>
       <v-spacer></v-spacer>
       <v-btn v-if="router.currentRoute.value.path !== '/'" to="/" variant="text" color="white">
         <v-icon left>mdi-home</v-icon>
@@ -46,22 +46,24 @@
 <script lang="ts">
 import { defineComponent, onMounted, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import router from './router'
-
+import router from './config/router-setup'
+const title = ref<string>('')
 export default defineComponent({
   name: 'App',
   setup() {
+    title.value = 'Vue Practice Project'
+
     const authStore = useAuthStore()
     const isLoading = ref<boolean>(false)
 
-    const handleMounting = async () => {
+    const handleMounting = async (): Promise<void> => {
       isLoading.value = true
       authStore.initAuth().then(() => {
         isLoading.value = false
       })
     }
 
-    const handleLogout = async () => {
+    const handleLogout = async (): Promise<void> => {
       console.log('Logging out...')
       isLoading.value = true
       await authStore.logout()
@@ -77,7 +79,9 @@ export default defineComponent({
       handleLogout,
       isLoading,
       router,
+      title,
     }
   },
 })
+export { title }
 </script>

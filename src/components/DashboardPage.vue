@@ -2,7 +2,7 @@
   <v-container>
     <v-row justify="center">
       <v-col cols="12">
-        <h1 class="text-h4 text-center mb-6">Welcome to the Main Application</h1>
+        <h1 class="text-h4 text-left mb-6">Dashboard</h1>
       </v-col>
     </v-row>
 
@@ -58,6 +58,7 @@
 import { defineComponent, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { title } from '@/App.vue'
 
 interface Feature {
   title: string
@@ -68,14 +69,16 @@ interface Feature {
 export default defineComponent({
   name: 'MainPage',
   setup() {
+    title.value = 'Dashboard'
+
     const router = useRouter()
     const authStore = useAuthStore()
 
     // Sample features data
     const features = ref<Feature[]>([
       {
-        title: 'Dashboard',
-        description: 'View posts and user activity',
+        title: 'For You',
+        description: 'View Reddit posts tailored for you',
         icon: 'mdi-view-dashboard',
       },
       {

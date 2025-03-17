@@ -40,12 +40,15 @@
 </template>
 
 <script lang="ts">
+import { title } from '@/App.vue'
 import { defineComponent, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'HomePage',
   setup() {
+    title.value = 'Vue Practice Project'
+
     const router = useRouter()
 
     const features = ref([

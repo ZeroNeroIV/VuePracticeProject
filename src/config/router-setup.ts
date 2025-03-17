@@ -1,11 +1,13 @@
 import AuthPage from '@/components/AuthPage.vue'
 import HomePage from '@/components/HomePage.vue'
 import ForYouPage from '@/components/ForYouPage.vue'
+import SettingsPage from '@/components/SettingsPage.vue'
 import DashboardPage from '@/components/DashboardPage.vue'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import pinia from '@/config/pinia-setup'
 
-const authStore = useAuthStore()
+const authStore = useAuthStore(pinia)
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -30,6 +32,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/fyp',
     name: 'For You Page',
     component: ForYouPage,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/settings',
+    name: 'Settings Page',
+    component: SettingsPage,
     meta: { requiresAuth: true },
   },
 ]

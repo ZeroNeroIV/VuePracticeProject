@@ -102,10 +102,13 @@
 import { useAuthStore } from '@/stores/auth'
 import { defineComponent, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { title } from '@/App.vue'
 
 export default defineComponent({
   name: 'AuthPage',
   setup() {
+    title.value = 'Authentication'
+
     const isLogin = ref<boolean>(true)
     const identifier = ref('')
     const email = ref('')
