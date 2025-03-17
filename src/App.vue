@@ -1,0 +1,83 @@
+<template>
+  <v-app>
+    <!-- App Bar -->
+    <v-app-bar app class="bg-transparent elevation-0">
+      <v-app-bar-title>Vue Practice App</v-app-bar-title>
+      <v-spacer></v-spacer>
+      <v-btn v-if="router.currentRoute.value.path !== '/'" to="/" variant="text" color="white">
+        <v-icon left>mdi-home</v-icon>
+        Home
+      </v-btn>
+      <v-btn v-else variant="text" color="white" :disabled="true" style="opacity: 0.5">
+        <v-icon left>mdi-home</v-icon>
+        Home
+      </v-btn>
+      <v-btn v-if="authStore.isLoggedIn" to="/dashboard" variant="text" color="white">
+        <v-icon left>mdi-file-document</v-icon>
+        Dashboard
+      </v-btn>
+      <v-btn v-else variant="text" color="white" :disabled="true" style="opacity: 0.5">
+        <v-icon left>mdi-file-document</v-icon>
+        Dashboard
+      </v-btn>
+      <v-btn v-if="authStore.isLoggedIn" @click="handleLogout" variant="text" color="red">
+        <v-icon left>mdi-logout</v-icon>
+        Logout
+      </v-btn>
+      <v-btn v-else to="/auth" variant="text" color="white">
+        <v-icon left>mdi-login</v-icon>
+        Login
+      </v-btn>
+    </v-app-bar>
+
+    <!-- Main Content -->
+    <v-main>
+      <router-view v-if="!isLoading" />
+      <div v-else>Loading...</div>
+    </v-main>
+
+    <!-- Footer -->
+    <v-footer app class="bg-grey-darken-3">
+      <v-container class="text-center"> &copy; 2025 Vue Practice App - Alameen Sabbah </v-container>
+    </v-footer>
+  </v-app>
+</template>
+
+<script lang="ts">
+import { defineComponent, onMounted, ref } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import router from './router'
+
+export default defineComponent({
+  name: 'App',
+  setup() {
+    const authStore = useAuthStore()
+    const isLoading = ref<boolean>(false)
+
+    const handleMounting = async () => {
+      isLoading.value = true
+      authStore.initAuth().then(() => {
+        isLoading.value = false
+      })
+    }
+
+    const handleLogout = async () => {
+      console.log('Logging out...')
+      isLoading.value = true
+      await authStore.logout()
+      router.push('/')
+      isLoading.value = false
+      console.log('Logged out!')
+    }
+
+    onMounted(handleMounting)
+
+    return {
+      authStore,
+      handleLogout,
+      isLoading,
+      router,
+    }
+  },
+})
+</script>
