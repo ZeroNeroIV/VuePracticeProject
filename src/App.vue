@@ -1,24 +1,24 @@
 <template>
   <v-app>
     <!-- App Bar -->
-    <v-app-bar app class="bg-transparent elevation-0">
+    <v-app-bar class="bg-transparent elevation-0">
       <v-app-bar-title>{{ title }}</v-app-bar-title>
       <v-spacer></v-spacer>
-      <v-btn v-if="router.currentRoute.value.path !== '/'" to="/" variant="text" color="white">
+      <v-btn to="/" variant="text" color="white">
         <v-icon left>mdi-home</v-icon>
         Home
       </v-btn>
-      <v-btn v-else variant="text" color="white" :disabled="true" style="opacity: 0.5">
-        <v-icon left>mdi-home</v-icon>
-        Home
-      </v-btn>
-      <v-btn v-if="authStore.isLoggedIn" to="/dashboard" variant="text" color="white">
+      <v-btn to="/dashboard" variant="text" color="white">
         <v-icon left>mdi-file-document</v-icon>
         Dashboard
       </v-btn>
-      <v-btn v-else variant="text" color="white" :disabled="true" style="opacity: 0.5">
-        <v-icon left>mdi-file-document</v-icon>
-        Dashboard
+      <v-btn to="/fyp" variant="text" color="white">
+        <v-icon left>mdi-view-dashboard</v-icon>
+        For You
+      </v-btn>
+      <v-btn to="/settings" variant="text" color="white">
+        <v-icon left>mdi-cog</v-icon>
+        Settings
       </v-btn>
       <v-btn v-if="authStore.isLoggedIn" @click="handleLogout" variant="text" color="red">
         <v-icon left>mdi-logout</v-icon>
@@ -26,12 +26,12 @@
       </v-btn>
       <v-btn v-else to="/auth" variant="text" color="white">
         <v-icon left>mdi-login</v-icon>
-        Login
+        Register/Login
       </v-btn>
     </v-app-bar>
 
     <!-- Main Content -->
-    <v-main>
+    <v-main class="full-screen">
       <router-view v-if="!isLoading" />
       <div v-else>Loading...</div>
     </v-main>
@@ -43,45 +43,40 @@
   </v-app>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue'
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import router from './config/router-setup'
-const title = ref<string>('')
-export default defineComponent({
-  name: 'App',
-  setup() {
-    title.value = 'Vue Practice Project'
+import { title } from '@/main.ts'
 
-    const authStore = useAuthStore()
-    const isLoading = ref<boolean>(false)
+title.value = 'Vue Practice Project'
 
-    const handleMounting = async (): Promise<void> => {
-      isLoading.value = true
-      authStore.initAuth().then(() => {
-        isLoading.value = false
-      })
-    }
+const authStore = useAuthStore()
+const isLoading = ref<boolean>(false)
 
-    const handleLogout = async (): Promise<void> => {
-      console.log('Logging out...')
-      isLoading.value = true
-      await authStore.logout()
-      router.push('/')
-      isLoading.value = false
-      console.log('Logged out!')
-    }
+const handleMounting = async (): Promise<void> => {
+  isLoading.value = true
+  authStore.initAuth().then(() => {
+    isLoading.value = false
+  })
+}
 
-    onMounted(handleMounting)
+const handleLogout = async (): Promise<void> => {
+  console.log('Logging out...')
+  isLoading.value = true
+  await authStore.logout()
+  router.push('/')
+  isLoading.value = false
+  console.log('Logged out!')
+}
 
-    return {
-      authStore,
-      handleLogout,
-      isLoading,
-      router,
-      title,
-    }
-  },
-})
-export { title }
+onMounted(handleMounting)
 </script>
+
+<style>
+.full-screen {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+</style>

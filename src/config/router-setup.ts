@@ -6,6 +6,7 @@ import DashboardPage from '@/components/DashboardPage.vue'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import pinia from '@/config/pinia-setup'
+import PostPage from '@/components/PostPage.vue'
 
 const authStore = useAuthStore(pinia)
 
@@ -40,6 +41,12 @@ const routes: Array<RouteRecordRaw> = [
     component: SettingsPage,
     meta: { requiresAuth: true },
   },
+  {
+    path: '/post/:id',
+    name: 'Post Page',
+    component: PostPage,
+    meta: { requiresAuth: true },
+  }
 ]
 
 const router = createRouter({

@@ -11,77 +11,26 @@
 
           <v-card-text>
             <v-form @submit.prevent="handleSubmit">
-              <v-text-field
-                v-if="isLogin"
-                v-model="identifier"
-                label="Name or Email"
-                type="text"
-                required
-                variant="outlined"
-                prepend-inner-icon="mdi-account"
-                full-width
-                @change="handleTextChange"
-              />
+              <v-text-field v-if="isLogin" v-model="identifier" label="Name or Email" type="text" required
+                variant="outlined" prepend-inner-icon="mdi-account" full-width @change="handleTextChange" />
 
-              <v-text-field
-                v-if="!isLogin"
-                v-model="name"
-                label="Name"
-                type="text"
-                required
-                variant="outlined"
-                prepend-inner-icon="mdi-account"
-                full-width
-                @change="handleTextChange"
-              />
+              <v-text-field v-if="!isLogin" v-model="name" label="Name" type="text" required variant="outlined"
+                prepend-inner-icon="mdi-account" full-width @change="handleTextChange" />
 
-              <v-text-field
-                v-if="!isLogin"
-                v-model="email"
-                label="E-mail"
-                type="email"
-                required
-                variant="outlined"
-                prepend-inner-icon="mdi-email"
-                full-width
-                @change="handleTextChange"
-              />
+              <v-text-field v-if="!isLogin" v-model="email" label="E-mail" type="email" required variant="outlined"
+                prepend-inner-icon="mdi-email" full-width @change="handleTextChange" />
 
-              <v-text-field
-                v-model="password"
-                label="Password"
-                type="password"
-                required
-                variant="outlined"
-                prepend-inner-icon="mdi-lock"
-                full-width
-                @change="handleTextChange"
-              />
+              <v-text-field v-model="password" label="Password" type="password" required variant="outlined"
+                prepend-inner-icon="mdi-lock" full-width @change="handleTextChange" />
 
-              <v-text-field
-                v-if="!isLogin"
-                v-model="confirmPassword"
-                label="Confirm Password"
-                type="password"
-                required
-                variant="outlined"
-                prepend-inner-icon="mdi-account"
-                full-width
-                @change="handleTextChange"
-              />
+              <v-text-field v-if="!isLogin" v-model="confirmPassword" label="Confirm Password" type="password" required
+                variant="outlined" prepend-inner-icon="mdi-account" full-width @change="handleTextChange" />
 
               <v-alert v-if="authStore.authError" type="error" variant="tonal" class="mt-4">
                 {{ authStore.authError }}
               </v-alert>
 
-              <v-btn
-                type="submit"
-                color="primary"
-                block
-                class="mt-4"
-                size="large"
-                :loading="authStore.isLoading"
-              >
+              <v-btn type="submit" color="primary" block class="mt-4" size="large" :loading="authStore.isLoading">
                 {{ isLogin ? 'Login' : 'Register' }}
               </v-btn>
             </v-form>
@@ -102,7 +51,7 @@
 import { useAuthStore } from '@/stores/auth'
 import { defineComponent, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { title } from '@/App.vue'
+import { title } from '@/main.ts'
 
 export default defineComponent({
   name: 'AuthPage',

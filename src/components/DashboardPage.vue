@@ -46,7 +46,7 @@
           </v-card-text>
 
           <v-card-actions class="mt-auto">
-            <v-btn color="primary" variant="tonal" block> Access </v-btn>
+            <v-btn :to="feature.path" color="primary" variant="tonal" block> Access </v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -58,12 +58,13 @@
 import { defineComponent, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import { title } from '@/App.vue'
+import { title } from '@/main.ts'
 
 interface Feature {
   title: string
   description: string
   icon: string
+  path: string
 }
 
 export default defineComponent({
@@ -80,11 +81,13 @@ export default defineComponent({
         title: 'For You',
         description: 'View Reddit posts tailored for you',
         icon: 'mdi-view-dashboard',
+        path: '/fyp',
       },
       {
         title: 'Settings',
         description: 'Configure your account settings',
         icon: 'mdi-cog',
+        path: '/settings',
       },
     ])
 

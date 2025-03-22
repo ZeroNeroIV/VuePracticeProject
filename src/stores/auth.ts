@@ -120,11 +120,9 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = loggedUser
       isLoggedIn.value = true
       localStorage.setItem('user', JSON.stringify(loggedUser))
-
-      router.replace('/auth')
       return true
     } catch (error) {
-      authError.value = 'Registration Failed: Invalid email or password'
+      authError.value = 'Registration Failed: Invalid email or password\n\n' + error
       return false
     } finally {
       isLoading.value = false
