@@ -1,50 +1,112 @@
 <template>
-  <v-container class="fill-height" fluid>
-    <v-row justify="center" align="center">
-      <v-col cols="12" sm="8" md="6" lg="4">
-        <v-card class="mx-auto" elevation="8">
-          <v-card-item>
-            <v-card-title class="text-h5 text-primary text-center">
-              {{ isLogin ? 'Login' : 'Register' }}
-            </v-card-title>
-          </v-card-item>
+  <div class="auth-container">
+    <div class="auth-content">
+      <div class="auth-card">
+        <div class="card-header">
+          <h1 class="card-title">
+            {{ isLogin ? 'Welcome Back' : 'Join Us' }}
+          </h1>
+        </div>
 
-          <v-card-text>
-            <v-form @submit.prevent="handleSubmit">
-              <v-text-field v-if="isLogin" v-model="identifier" label="Name or Email" type="text" required
-                variant="outlined" prepend-inner-icon="mdi-account" full-width @change="handleTextChange" />
+        <div class="card-body">
+          <form @submit.prevent="handleSubmit">
+            <div v-if="isLogin" class="form-group">
+              <label for="identifier">Name or Email</label>
+              <div class="input-group">
+                <span class="input-icon">👤</span>
+                <input
+                  id="identifier"
+                  v-model="identifier"
+                  type="text"
+                  required
+                  @change="handleTextChange"
+                />
+              </div>
+            </div>
 
-              <v-text-field v-if="!isLogin" v-model="name" label="Name" type="text" required variant="outlined"
-                prepend-inner-icon="mdi-account" full-width @change="handleTextChange" />
+            <div v-if="!isLogin" class="form-group">
+              <label for="name">Name</label>
+              <div class="input-group">
+                <span class="input-icon">👤</span>
+                <input
+                  id="name"
+                  v-model="name"
+                  type="text"
+                  required
+                  @change="handleTextChange"
+                />
+              </div>
+            </div>
 
-              <v-text-field v-if="!isLogin" v-model="email" label="E-mail" type="email" required variant="outlined"
-                prepend-inner-icon="mdi-email" full-width @change="handleTextChange" />
+            <div v-if="!isLogin" class="form-group">
+              <label for="email">E-mail</label>
+              <div class="input-group">
+                <span class="input-icon">📧</span>
+                <input
+                  id="email"
+                  v-model="email"
+                  type="email"
+                  required
+                  @change="handleTextChange"
+                />
+              </div>
+            </div>
 
-              <v-text-field v-model="password" label="Password" type="password" required variant="outlined"
-                prepend-inner-icon="mdi-lock" full-width @change="handleTextChange" />
+            <div class="form-group">
+              <label for="password">Password</label>
+              <div class="input-group">
+                <span class="input-icon">🔒</span>
+                <input
+                  id="password"
+                  v-model="password"
+                  type="password"
+                  required
+                  @change="handleTextChange"
+                />
+              </div>
+            </div>
 
-              <v-text-field v-if="!isLogin" v-model="confirmPassword" label="Confirm Password" type="password" required
-                variant="outlined" prepend-inner-icon="mdi-account" full-width @change="handleTextChange" />
+            <div v-if="!isLogin" class="form-group">
+              <label for="confirmPassword">Confirm Password</label>
+              <div class="input-group">
+                <span class="input-icon">🔒</span>
+                <input
+                  id="confirmPassword"
+                  v-model="confirmPassword"
+                  type="password"
+                  required
+                  @change="handleTextChange"
+                />
+              </div>
+            </div>
 
-              <v-alert v-if="authStore.authError" type="error" variant="tonal" class="mt-4">
-                {{ authStore.authError }}
-              </v-alert>
+            <div v-if="authStore.authError" class="error-alert">
+              {{ authStore.authError }}
+              <button class="close-button" @click="handleTextChange">×</button>
+            </div>
 
-              <v-btn type="submit" color="primary" block class="mt-4" size="large" :loading="authStore.isLoading">
-                {{ isLogin ? 'Login' : 'Register' }}
-              </v-btn>
-            </v-form>
-          </v-card-text>
+            <button
+              type="submit"
+              class="submit-button"
+              :disabled="authStore.isLoading"
+            >
+              <span v-if="authStore.isLoading" class="loader"></span>
+              <span v-else>{{ isLogin ? 'Sign In' : 'Create Account' }}</span>
+            </button>
+          </form>
+        </div>
 
-          <v-card-actions class="justify-center pb-6">
-            <v-btn variant="text" @click="toggleAuthMode" color="primary">
-              {{ isLogin ? 'Create an account' : 'Login instead' }}
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
+        <div class="card-footer">
+          <button
+            class="toggle-button"
+            @click="toggleAuthMode"
+          >
+            {{ isLogin ? 'New here? Create an account' : 'Already have an account? Sign in' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -130,3 +192,154 @@ export default defineComponent({
   },
 })
 </script>
+
+<style scoped>
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d3748 100%);
+  padding: 20px;
+}
+
+.auth-content {
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-card {
+  background: #2d3748;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 24px 24px 0;
+}
+
+.card-title {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 24px;
+  color: #ffffff;
+}
+
+.card-body {
+  padding: 24px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #e2e8f0;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  border: 1px solid #4a5568;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #1a202c;
+}
+
+.input-icon {
+  padding: 8px;
+  background: #2d3748;
+  border-right: 1px solid #4a5568;
+}
+
+.input-group input {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  background: #1a202c;
+  color: #ffffff;
+}
+
+.error-alert {
+  background: #742a2a;
+  color: #feb2b2;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.close-button {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #feb2b2;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 12px;
+  background: #4299e1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submit-button:hover {
+  background: #3182ce;
+}
+
+.submit-button:disabled {
+  background: #2c5282;
+  cursor: not-allowed;
+}
+
+.loader {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.card-footer {
+  padding: 0 24px 24px;
+  text-align: center;
+}
+
+.toggle-button {
+  background: none;
+  border: none;
+  color: #63b3ed;
+  cursor: pointer;
+  font-size: 14px;
+  text-decoration: underline;
+}
+
+.toggle-button:hover {
+  color: #4299e1;
+}
+</style>

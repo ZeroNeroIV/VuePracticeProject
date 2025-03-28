@@ -2,20 +2,16 @@
   <div class="dark-theme">
     <div class="container">
       <div class="row">
-        <div class="col">
+        <div class="col p-3">
           <div class="card mt-4 mb-4">
-            <div class="card-body" v-if="postData">
-              <h2 class="card-title">{{ postData.data.title }}</h2>
-              <div class="meta-info">
-                <div class="avatar-container">
-                  <img :src="postData.data.thumbnail" alt="Post Thumbnail" class="thumbnail" />
-                </div>
+            <div class="card-body p-4" v-if="postData">
+              <h2 class="card-title mb-3 p-2" v-html="markdownTitle"></h2>
+              <div class="meta-info mb-4 p-2">
                 <h3 class="card-subtitle">{{ subtitle }}</h3>
               </div>
-              <img :src="postData.data.url" alt="Post Image" class="main-image mb-4" />
-              <p class="card-text">{{ postData.data.selftext }}</p>
-              <div class="button-container">
-                <button class="btn btn-primary" @click="goBack">
+              <div class="card-text markdown-content mb-4 p-5" v-html="markdownContent"></div>
+              <div class="button-container p-2">
+                <button class="btn btn-primary me-3" @click="goBack">
                   <span class="btn-text">← Go Back</span>
                 </button>
                 <button class="btn btn-secondary" @click="goToReddit">
@@ -23,7 +19,7 @@
                 </button>
               </div>
             </div>
-            <div class="card-body" v-else>
+            <div class="card-body p-4" v-else>
               <p>Loading post data...</p>
             </div>
           </div>
@@ -38,6 +34,8 @@ import { title } from '@/main.ts'
 import { useRedditStore, type RedditPost } from '@/stores/reddit'
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 
 const router = useRouter()
 const redditStore = useRedditStore()
@@ -45,6 +43,17 @@ const redditStore = useRedditStore()
 const postId = router.currentRoute.value.params.id as string
 const postData = ref<RedditPost | null>(null)
 const error = ref<string | null>(null)
+
+const markdownTitle = computed(() => {
+  if (!postData.value) return '';
+  return DOMPurify.sanitize(marked.parse(postData.value.data.title).toString());
+})
+
+const markdownContent = computed(() => {
+  if (!postData.value) return '';
+  return DOMPurify.sanitize(marked.parse(postData.value.data.selftext).toString());
+})
+
 const subtitle = computed(() => {
   return postData.value ? `${postData.value.data.author} - ${new Date(postData.value.data.created_utc * 1000).toLocaleDateString()}` : ''
 })
@@ -71,7 +80,7 @@ const goBack = () => {
 
 const goToReddit = () => {
   if (postData.value) {
-    window.open(`https://www.reddit.com${postData.value.data.permalink}`, '_blank')
+    window.open(`https://www.reddit.com/r/${postData.value.data.subreddit}/comments/${postData.value.data.id}`, '_blank')
   }
 }
 
@@ -85,6 +94,8 @@ onMounted(() => {
   background-color: #1a1a1a;
   color: #ffffff;
   min-height: 100vh;
+  margin: 0;
+  padding: 20px 0;
 }
 
 .container {
@@ -98,6 +109,7 @@ onMounted(() => {
   border-radius: 12px;
   background-color: #2d2d2d;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  margin: 20px 0;
 }
 
 .card-body {
@@ -123,32 +135,66 @@ onMounted(() => {
   margin: 0;
 }
 
-.thumbnail {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  margin-right: 15px;
-  border: 2px solid #404040;
-}
-
-.main-image {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-  margin-bottom: 20px;
-}
-
-.card-text {
+.markdown-content {
   color: #e0e0e0;
   line-height: 1.6;
   font-size: 16px;
+  margin: 20px 0;
+}
+
+.markdown-content :deep(h1),
+.markdown-content :deep(h2),
+.markdown-content :deep(h3),
+.markdown-content :deep(h4),
+.markdown-content :deep(h5),
+.markdown-content :deep(h6) {
+  color: #ffffff;
+  margin: 1.2em 0 0.8em;
+}
+
+.markdown-content :deep(p) {
+  margin: 1em 0;
+}
+
+.markdown-content :deep(a) {
+  color: #2196f3;
+  text-decoration: none;
+  margin: 0.5em 0;
+}
+
+.markdown-content :deep(a:hover) {
+  text-decoration: underline;
+}
+
+.markdown-content :deep(code) {
+  background-color: #363636;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: monospace;
+  margin: 0 0.2em;
+}
+
+.markdown-content :deep(pre) {
+  background-color: #363636;
+  padding: 1em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1.5em 0;
+}
+
+.markdown-content :deep(blockquote) {
+  border-left: 4px solid #4a4a4a;
+  margin: 1.5em 0;
+  padding: 0.5em 0 0.5em 1em;
+  color: #b0b0b0;
 }
 
 .button-container {
   display: flex;
   justify-content: center;
   gap: 15px;
-  margin-top: 25px;
+  margin-top: 30px;
+  margin-bottom: 15px;
 }
 
 .btn {
@@ -158,6 +204,7 @@ onMounted(() => {
   border: none;
   font-weight: 500;
   transition: all 0.3s ease;
+  margin: 0 5px;
 }
 
 .btn-primary {

@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 
 export interface User {
   id: string
@@ -27,8 +26,6 @@ export const useAuthStore = defineStore('auth', () => {
   const authError = ref<string | null>(null)
   const isLoading = ref<boolean>(false)
   const isInitialized = ref<boolean>(true)
-
-  const router = useRouter()
 
   const initAuth = async (): Promise<void> => {
     const accessToken = localStorage.getItem('accessToken')

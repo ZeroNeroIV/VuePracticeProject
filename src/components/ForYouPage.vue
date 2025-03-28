@@ -1,42 +1,42 @@
 <template>
   <div class="container">
+    <div class="search-container">
+      <div class="search-wrapper">
+        <input
+          type="text"
+          v-model="redditStore.subreddit"
+          @input="handleSubredditChange"
+          placeholder="Enter subreddit name..."
+          class="search-input"
+        />
+      </div>
+    </div>
     <div class="row">
       <div class="col">
-        <div v-for="(post, index) in redditStore.posts" :key="index" class="card mb-4">
+        <div v-for="(post, index) in uniquePosts" :key="post.data.id" class="card mb-4">
           <div class="card-header">
-            <h2 class="card-title text-truncate">{{ post.data.title }}</h2>
+            <h2 class="card-title" v-html="truncateText(formatMarkdown(post.data.title), 100)"></h2>
             <div class="author-info">
               <div class="avatar">
-                <img
-                  :src="post.data.thumbnail"
-                  alt="Post Thumbnail"
-                  width="32"
-                  height="32"
-                  @error="handleImageError"
-                  v-if="post.data.thumbnail && post.data.thumbnail !== 'self' && post.data.thumbnail !== 'default'"
-                />
-                <div v-else class="avatar-placeholder">
+                <div class="avatar-placeholder">
                   <i class="fas fa-user"></i>
                 </div>
               </div>
-              <span class="author-text text-truncate">{{ post.data.author }} • {{ post.data.created_utc }}</span>
+              <span class="author-text">{{ truncateText(post.data.author, 20) }} • {{ formatDate(post.data.created_utc) }}</span>
             </div>
           </div>
           <div class="card-body">
-            <img
-              v-if="post.data.url && isImageUrl(post.data.url)"
-              :src="post.data.url"
-              alt="Post Image"
-              class="post-image"
-              @error="handleImageError"
-            />
-            <p class="post-text line-clamp">{{ post.data.selftext }}</p>
+            <p class="post-text line-clamp" v-html="truncateText(formatMarkdown(post.data.selftext), 300)"></p>
             <button class="btn-primary" @click="goToPost(index)">
               <span>Read More</span>
               <i class="fas fa-arrow-right"></i>
             </button>
           </div>
         </div>
+        <div v-if="loading" class="loading-indicator">
+          Loading more posts...
+        </div>
+        <div ref="loadingTrigger" class="loading-trigger"></div>
       </div>
     </div>
   </div>
@@ -45,29 +45,98 @@
 <script setup lang="ts">
 import { title } from '@/main.ts'
 import router from '@/config/router-setup';
-import { useRedditStore } from '@/stores/reddit';
-import { onMounted } from 'vue';
+import { useRedditStore, type RedditPost } from '@/stores/reddit';
+import { onMounted, ref, reactive, watch, computed } from 'vue';
+import {marked} from 'marked';
+import DOMPurify from 'dompurify';
 
 title.value = 'For You'
 
 const redditStore = useRedditStore()
+const posts = reactive<RedditPost[]>([])
+const loading = ref(false)
+const loadingTrigger = ref<HTMLElement | null>(null)
+const page = ref(1)
+
+// Compute unique posts based on post ID
+const uniquePosts = computed(() => {
+  const seen = new Set();
+  return posts.filter(post => {
+    const duplicate = seen.has(post.data.id);
+    seen.add(post.data.id);
+    return !duplicate;
+  });
+});
+
+const truncateText = (text: string, maxLength: number): string => {
+  if (!text) return '';
+  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+}
+
+const handleSubredditChange = async () => {
+  // Clear current posts before fetching new ones
+  redditStore.posts.length = 0;
+  posts.length = 0;
+  page.value = 1;
+  await redditStore.getRedditPosts(redditStore.subreddit.replace(' ', ''))
+  posts.push(...redditStore.posts);
+}
+
+const loadMorePosts = async () => {
+  if (loading.value) return;
+
+  loading.value = true;
+  page.value++;
+
+  try {
+    await redditStore.getRedditPosts(redditStore.subreddit, page.value);
+    const newPosts = redditStore.posts.filter(newPost =>
+      !posts.some(existingPost => existingPost.data.id === newPost.data.id)
+    );
+    posts.push(...newPosts);
+  } catch (error) {
+    console.error('Error loading more posts:', error);
+  } finally {
+    loading.value = false;
+  }
+}
+
+const formatMarkdown = (text: string): string => {
+  if (!text) return '';
+  const rawHtml = marked.parse(text);
+  return DOMPurify.sanitize(rawHtml.toString());
+}
 
 const goToPost = (index: number) => {
-  router.push('/post/' + redditStore.posts[index].data.id)
+  router.push('/post/' + uniquePosts.value[index].data.id)
 }
 
-const handleImageError = (event: Event) => {
-  const target = event.target as HTMLImageElement;
-  target.style.display = 'none';
-}
-
-const isImageUrl = (url: string): boolean => {
-  return url.match(/\.(jpeg|jpg|gif|png)$/) !== null;
+const formatDate = (timestamp: number): string => {
+  return new Date(timestamp * 1000).toLocaleDateString();
 }
 
 onMounted(() => {
-  redditStore.getRedditPosts()
+  redditStore.getRedditPosts();
+
+  // Set up Intersection Observer for infinite scrolling
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) {
+        loadMorePosts();
+      }
+    },
+    { threshold: 0.1 }
+  );
+
+  if (loadingTrigger.value) {
+    observer.observe(loadingTrigger.value);
+  }
 })
+
+// Watch for changes in posts to refresh content
+watch(() => redditStore.posts, () => {
+  // Content will automatically refresh due to Vue's reactivity
+}, { deep: true })
 </script>
 
 <style scoped>
@@ -77,6 +146,37 @@ onMounted(() => {
   margin: 0 auto;
   background-color: #1a1a1a;
   min-height: 100vh;
+}
+
+.search-container {
+  margin-bottom: 2rem;
+}
+
+.search-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.search-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 2px solid #333;
+  border-radius: 8px;
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #7289da;
+  box-shadow: 0 0 0 2px rgba(114, 137, 218, 0.3);
+}
+
+.search-input::placeholder {
+  color: #666;
 }
 
 .card {
@@ -104,14 +204,6 @@ onMounted(() => {
   font-size: 1.75rem;
   color: #e0e0e0;
   font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.text-truncate {
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
 }
 
 .author-info {
@@ -125,12 +217,6 @@ onMounted(() => {
   width: 32px;
   height: 32px;
   flex-shrink: 0;
-}
-
-.avatar img {
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #444;
 }
 
 .avatar-placeholder {
@@ -152,16 +238,6 @@ onMounted(() => {
 
 .card-body {
   padding: 1.25rem;
-}
-
-.post-image {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 16/9;
-  object-fit: cover;
-  margin-bottom: 1.25rem;
-  border-radius: 8px;
-  border: 1px solid #333;
 }
 
 .post-text {
@@ -200,5 +276,63 @@ onMounted(() => {
 
 .btn-primary i {
   font-size: 0.9rem;
+}
+
+.loading-indicator {
+  text-align: center;
+  padding: 1rem;
+  color: #888;
+}
+
+.loading-trigger {
+  height: 20px;
+  margin-bottom: 20px;
+}
+
+/* Additional styles for markdown content */
+:deep(.post-text) {
+  h1, h2, h3, h4, h5, h6 {
+    color: #e0e0e0;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    margin-bottom: 1rem;
+  }
+
+  a {
+    color: #7289da;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  code {
+    background-color: #333;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+
+  pre {
+    background-color: #333;
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+
+  blockquote {
+    border-left: 4px solid #7289da;
+    padding-left: 1rem;
+    margin-left: 0;
+    color: #888;
+  }
+
+  ul, ol {
+    padding-left: 2rem;
+    margin-bottom: 1rem;
+  }
 }
 </style>

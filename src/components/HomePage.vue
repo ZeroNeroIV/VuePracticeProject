@@ -14,7 +14,11 @@
             </p>
             <ul class="feature-list">
               <li v-for="(item, i) in features" :key="i" class="feature-item">
-                <span class="check-icon">✓</span>
+                <span class="check-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 6L9 17L4 12" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
                 <span class="feature-text">{{ item }}</span>
               </li>
             </ul>
@@ -22,8 +26,9 @@
         </div>
 
         <div class="card-footer">
-          <button class="btn-primary" @click="navigateToAuth">
-            Try Now
+          <button class="try-now-btn" @click="navigateToAuth">
+            <span class="btn-text">Try Now</span>
+            <span class="btn-icon">→</span>
           </button>
         </div>
       </div>
@@ -36,12 +41,10 @@ import { title } from '@/main.ts'
 import { defineComponent, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-
 export default defineComponent({
   name: 'HomePage',
   setup() {
     title.value = 'Home'
-
 
     const router = useRouter()
 
@@ -52,12 +55,9 @@ export default defineComponent({
       'Component composition with the Composition API',
     ])
 
-
     const navigateToAuth = (): void => {
-
       router.push('/auth')
     }
-
 
     return {
       features,
@@ -65,7 +65,6 @@ export default defineComponent({
     }
   },
 })
-
 </script>
 
 <style scoped>
@@ -74,17 +73,14 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   align-items: center;
-
   padding: 20px;
   background-color: #121212;
-
 }
 
 .row {
   width: 100%;
   max-width: 800px;
 }
-
 
 .card {
   background: #1e1e1e;
@@ -93,16 +89,13 @@ export default defineComponent({
   padding: 24px;
 }
 
-
 .card-header {
   text-align: center;
   margin-bottom: 24px;
 }
 
-
 .title {
   color: #64b5f6;
-
   font-size: 2.5rem;
   margin-bottom: 16px;
 }
@@ -113,11 +106,9 @@ export default defineComponent({
   margin-bottom: 24px;
 }
 
-
 .card-body {
   margin-bottom: 24px;
 }
-
 
 .description {
   margin-bottom: 16px;
@@ -129,13 +120,72 @@ export default defineComponent({
   padding: 0;
 }
 
-
 .feature-item {
   display: flex;
   align-items: center;
-
   margin-bottom: 12px;
-  color: #e0e252;
+  color: #e0e0e0;
+  background: rgba(76, 175, 80, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+  background: rgba(76, 175, 80, 0.2);
+  transform: translateX(5px);
+}
+
+.check-icon {
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.feature-text {
+  font-size: 1.1rem;
+}
+
+.try-now-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #64b5f6 0%, #1976d2 100%);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 12px 30px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+.try-now-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(100, 181, 246, 0.3);
+  background: linear-gradient(135deg, #1976d2 0%, #64b5f6 100%);
+}
+
+.try-now-btn:active {
+  transform: translateY(1px);
+}
+
+.btn-text {
+  letter-spacing: 0.5px;
+}
+
+.btn-icon {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.try-now-btn:hover .btn-icon {
+  transform: translateX(5px);
 }
 
 .main-content {
@@ -193,6 +243,11 @@ export default defineComponent({
   .navbar {
     padding: 1rem;
   }
+
+  .try-now-btn {
+    font-size: 1rem;
+    padding: 10px 24px;
+  }
 }
 
 @media screen and (max-width: 480px) {
@@ -202,6 +257,12 @@ export default defineComponent({
 
   .footer-content {
     font-size: 0.8rem;
+  }
+
+  .try-now-btn {
+    max-width: 160px;
+    font-size: 0.9rem;
+    padding: 8px 20px;
   }
 }
 </style>
